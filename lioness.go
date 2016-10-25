@@ -1,6 +1,8 @@
 package lioness
 
 import (
+	"errors"
+
 	"git.schwanenlied.me/yawning/chacha20"
 	"github.com/minio/blake2b-simd"
 )
@@ -37,6 +39,10 @@ func NewLionessCipher(key []byte, blockSize int) *LionessCipher {
 }
 
 func (c *LionessCipher) Encrypt(message []byte) ([]byte, error) {
+	if len(message) != c.blockSize {
+		return nil, errors.New("input not equal to block size")
+	}
+
 	lSize := secretKeyLen
 	rSize := c.blockSize - lSize
 	tmp := make([]byte, lSize)
@@ -82,6 +88,10 @@ func (c *LionessCipher) Encrypt(message []byte) ([]byte, error) {
 }
 
 func (c *LionessCipher) Decrypt(message []byte) ([]byte, error) {
+	if len(message) != c.blockSize {
+		return nil, errors.New("input not equal to block size")
+	}
+
 	lSize := secretKeyLen
 	rSize := c.blockSize - lSize
 	tmp := make([]byte, lSize)
