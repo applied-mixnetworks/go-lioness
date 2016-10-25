@@ -47,7 +47,6 @@ func (c *LionessCipher) Encrypt(message []byte) ([]byte, error) {
 
 	// R = R ^ S(L ^ K1)
 	xorBytes(tmp, l, c.k1[:])
-	// XXX why should we compose the nonce and key like this?
 	chacha, err := chacha20.NewCipher(tmp[:chachaKeyLen], tmp[chachaKeyLen:chachaKeyLen+chachaNonceLen])
 	if err != nil {
 		return nil, err
@@ -63,7 +62,6 @@ func (c *LionessCipher) Encrypt(message []byte) ([]byte, error) {
 
 	// R = R ^ S(L ^ K3)
 	xorBytes(tmp, l, c.k3[:])
-	// XXX why should we compose the nonce and key like this?
 	chacha, err = chacha20.NewCipher(tmp[:chachaKeyLen], tmp[chachaKeyLen:chachaKeyLen+chachaNonceLen])
 	if err != nil {
 		return nil, err
@@ -100,7 +98,6 @@ func (c *LionessCipher) Decrypt(message []byte) ([]byte, error) {
 
 	// R = R ^ S(L ^ K3)
 	xorBytes(tmp, l, c.k3[:])
-	// XXX why should we compose the nonce and key like this?
 	chacha, err := chacha20.NewCipher(tmp[:chachaKeyLen], tmp[chachaKeyLen:chachaKeyLen+chachaNonceLen])
 	if err != nil {
 		return nil, err
@@ -116,7 +113,6 @@ func (c *LionessCipher) Decrypt(message []byte) ([]byte, error) {
 
 	// R = R ^ S(L ^ K1)
 	xorBytes(tmp, l, c.k1[:])
-	// XXX why should we compose the nonce and key like this?
 	chacha, err = chacha20.NewCipher(tmp[:chachaKeyLen], tmp[chachaKeyLen:chachaKeyLen+chachaNonceLen])
 	if err != nil {
 		return nil, err
