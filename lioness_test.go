@@ -2,7 +2,6 @@ package lioness
 
 import (
 	"bytes"
-	"fmt"
 	"testing"
 )
 
@@ -21,16 +20,12 @@ func TestBasicLionessEncrypt(t *testing.T) {
 		t.Error(err)
 		t.Fail()
 	}
-
 	message := []byte{}
 	message, err = cipher.Decrypt(ciphertext)
 	if err != nil {
 		t.Error(err)
 		t.Fail()
 	}
-
-	fmt.Printf("decrypted message: %s\n", message)
-
 	if !bytes.Equal(message, plaintext) {
 		t.Error("decrypted ciphertext not equal plaintext")
 		t.Fail()
