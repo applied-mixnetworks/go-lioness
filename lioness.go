@@ -56,10 +56,9 @@ func (c *LionessCipher) Encrypt(message []byte) ([]byte, error) {
 
 	// L = L ^ H(K2, R)
 	h := blake2b.NewMAC(uint8(lSize), c.k2[:hashKeyLen])
-	//h.Reset()
-	//h.Write(r)
-	//tmp1 := h.Sum(nil)
-	tmp1 := h.Sum(r)
+	h.Reset()
+	h.Write(r)
+	tmp1 := h.Sum(nil)
 	xorBytes(l, message[:lSize], tmp1)
 
 	// R = R ^ S(L ^ K3)
@@ -73,10 +72,9 @@ func (c *LionessCipher) Encrypt(message []byte) ([]byte, error) {
 
 	// L = L ^ H(K4, R)
 	h = blake2b.NewMAC(uint8(lSize), c.k4[:hashKeyLen])
-	//h.Reset()
-	//h.Write(r)
-	//tmp = h.Sum(nil)
-	tmp = h.Sum(r)
+	h.Reset()
+	h.Write(r)
+	tmp = h.Sum(nil)
 	xorBytes(l, l, tmp[:lSize])
 
 	out := make([]byte, c.blockSize)
@@ -95,10 +93,9 @@ func (c *LionessCipher) Decrypt(message []byte) ([]byte, error) {
 
 	// L = L ^ H(K4, R)
 	h := blake2b.NewMAC(uint8(lSize), c.k4[:hashKeyLen])
-	//h.Reset()
-	//h.Write(r)
-	//tmp = h.Sum(nil)
-	tmp = h.Sum(r)
+	h.Reset()
+	h.Write(r)
+	tmp = h.Sum(nil)
 	xorBytes(l, message, tmp[:lSize])
 
 	// R = R ^ S(L ^ K3)
@@ -112,10 +109,9 @@ func (c *LionessCipher) Decrypt(message []byte) ([]byte, error) {
 
 	// L = L ^ H(K2, R)
 	h = blake2b.NewMAC(uint8(lSize), c.k2[:hashKeyLen])
-	//h.Reset()
-	//h.Write(r)
-	//tmp = h.Sum(nil)
-	tmp = h.Sum(r)
+	h.Reset()
+	h.Write(r)
+	tmp = h.Sum(nil)
 	xorBytes(l, l, tmp[:lSize])
 
 	// R = R ^ S(L ^ K1)
