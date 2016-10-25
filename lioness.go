@@ -42,33 +42,40 @@ func (c *LionessCipher) Encrypt(message []byte) ([]byte, error) {
 	tmp := make([]byte, lSize)
 	l := make([]byte, lSize)
 	r := make([]byte, rSize)
-	copy(r[:], message[lSize:rSize])
+	copy(l, message[:lSize])
+	copy(r, message[lSize:lSize+rSize])
 
 	// R = R ^ S(L ^ K1)
-	xorBytes(tmp, message, c.k1[:])
+	xorBytes(tmp, l, c.k1[:])
 	// XXX why should we compose the nonce and key like this?
-	chacha, err := chacha20.NewCipher(tmp[:chachaKeyLen], tmp[chachaNonceLen:chachaNonceLen+8])
+	chacha, err := chacha20.NewCipher(tmp[:chachaKeyLen], tmp[chachaKeyLen:chachaKeyLen+chachaNonceLen])
 	if err != nil {
 		return nil, err
 	}
 	chacha.XORKeyStream(r, r)
 
 	// L = L ^ H(K2, R)
-	h := blake2b.NewMAC(uint8(lSize), c.k2[:])
-	tmp = h.Sum(r)
-	xorBytes(l, message[:lSize], tmp)
+	h := blake2b.NewMAC(uint8(lSize), c.k2[:hashKeyLen])
+	//h.Reset()
+	//h.Write(r)
+	//tmp1 := h.Sum(nil)
+	tmp1 := h.Sum(r)
+	xorBytes(l, message[:lSize], tmp1)
 
 	// R = R ^ S(L ^ K3)
 	xorBytes(tmp, l, c.k3[:])
 	// XXX why should we compose the nonce and key like this?
-	chacha, err = chacha20.NewCipher(tmp[:chachaKeyLen], tmp[chachaNonceLen:chachaNonceLen*2])
+	chacha, err = chacha20.NewCipher(tmp[:chachaKeyLen], tmp[chachaKeyLen:chachaKeyLen+chachaNonceLen])
 	if err != nil {
 		return nil, err
 	}
 	chacha.XORKeyStream(r, r)
 
 	// L = L ^ H(K4, R)
-	h = blake2b.NewMAC(uint8(lSize), c.k4[:])
+	h = blake2b.NewMAC(uint8(lSize), c.k4[:hashKeyLen])
+	//h.Reset()
+	//h.Write(r)
+	//tmp = h.Sum(nil)
 	tmp = h.Sum(r)
 	xorBytes(l, l, tmp[:lSize])
 
@@ -84,31 +91,37 @@ func (c *LionessCipher) Decrypt(message []byte) ([]byte, error) {
 	tmp := make([]byte, lSize)
 	l := make([]byte, lSize)
 	r := make([]byte, rSize)
-	copy(r[:], message[lSize:rSize])
+	copy(r, message[lSize:rSize])
 
 	// L = L ^ H(K4, R)
-	h := blake2b.NewMAC(uint8(lSize), c.k4[:])
+	h := blake2b.NewMAC(uint8(lSize), c.k4[:hashKeyLen])
+	//h.Reset()
+	//h.Write(r)
+	//tmp = h.Sum(nil)
 	tmp = h.Sum(r)
-	xorBytes(l, message[:lSize], tmp)
+	xorBytes(l, message, tmp[:lSize])
 
 	// R = R ^ S(L ^ K3)
 	xorBytes(tmp, l, c.k3[:])
 	// XXX why should we compose the nonce and key like this?
-	chacha, err := chacha20.NewCipher(tmp[:chachaKeyLen], tmp[chachaNonceLen:chachaNonceLen*2])
+	chacha, err := chacha20.NewCipher(tmp[:chachaKeyLen], tmp[chachaKeyLen:chachaKeyLen+chachaNonceLen])
 	if err != nil {
 		return nil, err
 	}
 	chacha.XORKeyStream(r, r)
 
 	// L = L ^ H(K2, R)
-	h = blake2b.NewMAC(uint8(lSize), c.k2[:])
+	h = blake2b.NewMAC(uint8(lSize), c.k2[:hashKeyLen])
+	//h.Reset()
+	//h.Write(r)
+	//tmp = h.Sum(nil)
 	tmp = h.Sum(r)
 	xorBytes(l, l, tmp[:lSize])
 
 	// R = R ^ S(L ^ K1)
 	xorBytes(tmp, l, c.k1[:])
 	// XXX why should we compose the nonce and key like this?
-	chacha, err = chacha20.NewCipher(tmp[:chachaKeyLen], tmp[chachaNonceLen:chachaNonceLen+8])
+	chacha, err = chacha20.NewCipher(tmp[:chachaKeyLen], tmp[chachaKeyLen:chachaKeyLen+chachaNonceLen])
 	if err != nil {
 		return nil, err
 	}
