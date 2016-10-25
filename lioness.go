@@ -91,7 +91,7 @@ func (c *LionessCipher) Decrypt(message []byte) ([]byte, error) {
 	tmp := make([]byte, lSize)
 	l := make([]byte, lSize)
 	r := make([]byte, rSize)
-	copy(r, message[lSize:rSize])
+	copy(r, message[lSize:lSize+rSize])
 
 	// L = L ^ H(K4, R)
 	h := blake2b.NewMAC(uint8(lSize), c.k4[:hashKeyLen])
