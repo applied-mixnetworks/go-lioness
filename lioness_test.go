@@ -32,6 +32,8 @@ func TestBasicLionessEncrypt(t *testing.T) {
 	}
 }
 
+var result []byte
+
 func BenchmarkLioness(b *testing.B) {
 	key := make([]byte, lionessKeyLen)
 	for i := 0; i < lionessKeyLen; i++ {
@@ -41,10 +43,16 @@ func BenchmarkLioness(b *testing.B) {
 	plaintext := []byte("'What do we know,' he had said, 'of the world and the universe about us? Our means of receiving impressions are absurdly few, and our notions of surrounding objects infinitely narrow. We see things only as we are constructed to see them, and can gain no idea of their absolute nature. With five feeble senses we pretend to comprehend the boundlessly complex cosmos, yet other beings with wider, stronger, or different range of senses might not only see very differently the things we see, but might see and st")
 	cipher := NewLionessCipher(key, len(plaintext)) // key and block-size
 
+	var err error
+	var ciphertext []byte
 	for i := 0; i < b.N; i++ {
-		_, err := cipher.Encrypt(plaintext)
+		ciphertext, err = cipher.Encrypt(plaintext)
 		if err != nil {
 			panic(err)
 		}
 	}
+
+	// always store the result to a package level variable
+	// so the compiler cannot eliminate the Benchmark itself.
+	result = ciphertext
 }
