@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	lionessKeyLen  = 208
+	LionessKeyLen  = 208
 	chachaNonceLen = 8
 	chachaKeyLen   = 32
 	hashKeyLen     = 64 // blake2b key len
@@ -24,8 +24,8 @@ type LionessCipher struct {
 	k4        [hashKeyLen]byte
 }
 
-func NewLionessCipher(key []byte, blockSize int) *LionessCipher {
-	if blockSize <= minBlockSize || len(key) != lionessKeyLen {
+func NewLionessCipher(key [LionessKeyLen]byte, blockSize int) *LionessCipher {
+	if blockSize <= minBlockSize {
 		return nil
 	}
 	c := LionessCipher{
@@ -48,11 +48,10 @@ func (c *LionessCipher) Encrypt(message []byte) ([]byte, error) {
 	tmp := make([]byte, lSize)
 	l := make([]byte, lSize)
 	r := make([]byte, rSize)
-	copy(l, message[:lSize])
 	copy(r, message[lSize:lSize+rSize])
 
 	// R = R ^ S(L ^ K1)
-	xorBytes(tmp, l, c.k1[:])
+	xorBytes(tmp, message[:lSize], c.k1[:])
 	chacha, err := chacha20.NewCipher(tmp[:chachaKeyLen], tmp[chachaKeyLen:chachaKeyLen+chachaNonceLen])
 	if err != nil {
 		return nil, err
