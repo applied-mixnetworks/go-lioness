@@ -56,7 +56,7 @@ func (c *Cipher) Encrypt(block []byte) ([]byte, error) {
 
 	// R = R ^ S(L ^ K1)
 	xorBytes(tmp, block[:lSize], c.k1[:])
-	chacha, err := chacha20.NewCipher(tmp[:chachaKeyLen], tmp[chachaKeyLen:chachaKeyLen+chachaNonceLen])
+	chacha, err := chacha20.NewCipher(tmp[chachaNonceLen:chachaNonceLen+chachaKeyLen], tmp[:chachaNonceLen])
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +71,7 @@ func (c *Cipher) Encrypt(block []byte) ([]byte, error) {
 
 	// R = R ^ S(L ^ K3)
 	xorBytes(tmp, l, c.k3[:])
-	chacha, err = chacha20.NewCipher(tmp[:chachaKeyLen], tmp[chachaKeyLen:chachaKeyLen+chachaNonceLen])
+	chacha, err = chacha20.NewCipher(tmp[chachaNonceLen:chachaNonceLen+chachaKeyLen], tmp[:chachaNonceLen])
 	if err != nil {
 		return nil, err
 	}
@@ -112,7 +112,7 @@ func (c *Cipher) Decrypt(block []byte) ([]byte, error) {
 
 	// R = R ^ S(L ^ K3)
 	xorBytes(tmp, l, c.k3[:])
-	chacha, err := chacha20.NewCipher(tmp[:chachaKeyLen], tmp[chachaKeyLen:chachaKeyLen+chachaNonceLen])
+	chacha, err := chacha20.NewCipher(tmp[chachaNonceLen:chachaNonceLen+chachaKeyLen], tmp[:chachaNonceLen])
 	if err != nil {
 		return nil, err
 	}
@@ -127,7 +127,7 @@ func (c *Cipher) Decrypt(block []byte) ([]byte, error) {
 
 	// R = R ^ S(L ^ K1)
 	xorBytes(tmp, l, c.k1[:])
-	chacha, err = chacha20.NewCipher(tmp[:chachaKeyLen], tmp[chachaKeyLen:chachaKeyLen+chachaNonceLen])
+	chacha, err = chacha20.NewCipher(tmp[chachaNonceLen:chachaNonceLen+chachaKeyLen], tmp[:chachaNonceLen])
 	if err != nil {
 		return nil, err
 	}
