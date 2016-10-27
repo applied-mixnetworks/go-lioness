@@ -8,6 +8,7 @@ import (
 )
 
 const (
+	// LionessKeyLen is the length of our Lioness key (208 bytes)
 	LionessKeyLen  = 208
 	chachaNonceLen = 8
 	chachaKeyLen   = 32
@@ -16,7 +17,8 @@ const (
 	minBlockSize   = secretKeyLen
 )
 
-type LionessCipher struct {
+// Cipher allows you to encrypt/decrypt large blocks
+type Cipher struct {
 	blockSize int
 	k1        [secretKeyLen]byte
 	k2        [hashKeyLen]byte
@@ -24,11 +26,12 @@ type LionessCipher struct {
 	k4        [hashKeyLen]byte
 }
 
-func NewLionessCipher(key [LionessKeyLen]byte, blockSize int) *LionessCipher {
+// NewCipher creates a new Cipher struct for encryption/decryption
+func NewCipher(key [LionessKeyLen]byte, blockSize int) *Cipher {
 	if blockSize <= minBlockSize {
 		return nil
 	}
-	c := LionessCipher{
+	c := Cipher{
 		blockSize: blockSize,
 	}
 	copy(c.k1[:], key[:secretKeyLen])
@@ -38,8 +41,9 @@ func NewLionessCipher(key [LionessKeyLen]byte, blockSize int) *LionessCipher {
 	return &c
 }
 
-func (c *LionessCipher) Encrypt(message []byte) ([]byte, error) {
-	if len(message) != c.blockSize {
+// Encrypt encrypts a block
+func (c *Cipher) Encrypt(block []byte) ([]byte, error) {
+	if len(block) != c.blockSize {
 		return nil, errors.New("input not equal to block size")
 	}
 
@@ -48,10 +52,10 @@ func (c *LionessCipher) Encrypt(message []byte) ([]byte, error) {
 	tmp := make([]byte, lSize)
 	l := make([]byte, lSize)
 	r := make([]byte, rSize)
-	copy(r, message[lSize:lSize+rSize])
+	copy(r, block[lSize:lSize+rSize])
 
 	// R = R ^ S(L ^ K1)
-	xorBytes(tmp, message[:lSize], c.k1[:])
+	xorBytes(tmp, block[:lSize], c.k1[:])
 	chacha, err := chacha20.NewCipher(tmp[:chachaKeyLen], tmp[chachaKeyLen:chachaKeyLen+chachaNonceLen])
 	if err != nil {
 		return nil, err
@@ -63,7 +67,7 @@ func (c *LionessCipher) Encrypt(message []byte) ([]byte, error) {
 	h.Reset()
 	h.Write(r)
 	tmp1 := h.Sum(nil)
-	xorBytes(l, message[:lSize], tmp1)
+	xorBytes(l, block[:lSize], tmp1)
 
 	// R = R ^ S(L ^ K3)
 	xorBytes(tmp, l, c.k3[:])
@@ -86,8 +90,9 @@ func (c *LionessCipher) Encrypt(message []byte) ([]byte, error) {
 	return out, nil
 }
 
-func (c *LionessCipher) Decrypt(message []byte) ([]byte, error) {
-	if len(message) != c.blockSize {
+// Decrypt decrypts a block
+func (c *Cipher) Decrypt(block []byte) ([]byte, error) {
+	if len(block) != c.blockSize {
 		return nil, errors.New("input not equal to block size")
 	}
 
@@ -96,14 +101,14 @@ func (c *LionessCipher) Decrypt(message []byte) ([]byte, error) {
 	tmp := make([]byte, lSize)
 	l := make([]byte, lSize)
 	r := make([]byte, rSize)
-	copy(r, message[lSize:lSize+rSize])
+	copy(r, block[lSize:lSize+rSize])
 
 	// L = L ^ H(K4, R)
 	h := blake2b.NewMAC(uint8(lSize), c.k4[:hashKeyLen])
 	h.Reset()
 	h.Write(r)
 	tmp = h.Sum(nil)
-	xorBytes(l, message, tmp[:lSize])
+	xorBytes(l, block, tmp[:lSize])
 
 	// R = R ^ S(L ^ K3)
 	xorBytes(tmp, l, c.k3[:])
