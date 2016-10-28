@@ -8,8 +8,8 @@ import (
 )
 
 const (
-	// LionessKeyLen is the length of our Lioness key (208 bytes)
-	LionessKeyLen  = 208
+	// KeyLen is the length of our Lioness key
+	KeyLen         = 208
 	chachaNonceLen = 8
 	chachaKeyLen   = 32
 	hashKeyLen     = 64 // blake2b key len
@@ -27,7 +27,7 @@ type Cipher struct {
 }
 
 // NewCipher creates a new Cipher struct for encryption/decryption
-func NewCipher(key [LionessKeyLen]byte, blockSize int) *Cipher {
+func NewCipher(key [KeyLen]byte, blockSize int) *Cipher {
 	if blockSize <= minBlockSize {
 		return nil
 	}
@@ -55,7 +55,7 @@ func (c *Cipher) Encrypt(block []byte) ([]byte, error) {
 	copy(r, block[lSize:lSize+rSize])
 
 	// R = R ^ S(L ^ K1)
-	xorBytes(tmp, block[:lSize], c.k1[:])
+	XorBytes(tmp, block[:lSize], c.k1[:])
 	chacha, err := chacha20.NewCipher(tmp[chachaNonceLen:chachaNonceLen+chachaKeyLen], tmp[:chachaNonceLen])
 	if err != nil {
 		return nil, err
@@ -67,10 +67,10 @@ func (c *Cipher) Encrypt(block []byte) ([]byte, error) {
 	h.Reset()
 	h.Write(r)
 	tmp1 := h.Sum(nil)
-	xorBytes(l, block[:lSize], tmp1)
+	XorBytes(l, block[:lSize], tmp1)
 
 	// R = R ^ S(L ^ K3)
-	xorBytes(tmp, l, c.k3[:])
+	XorBytes(tmp, l, c.k3[:])
 	chacha, err = chacha20.NewCipher(tmp[chachaNonceLen:chachaNonceLen+chachaKeyLen], tmp[:chachaNonceLen])
 	if err != nil {
 		return nil, err
@@ -82,7 +82,7 @@ func (c *Cipher) Encrypt(block []byte) ([]byte, error) {
 	h.Reset()
 	h.Write(r)
 	tmp = h.Sum(nil)
-	xorBytes(l, l, tmp[:lSize])
+	XorBytes(l, l, tmp[:lSize])
 
 	out := make([]byte, c.blockSize)
 	copy(out, l)
@@ -108,10 +108,10 @@ func (c *Cipher) Decrypt(block []byte) ([]byte, error) {
 	h.Reset()
 	h.Write(r)
 	tmp = h.Sum(nil)
-	xorBytes(l, block, tmp[:lSize])
+	XorBytes(l, block, tmp[:lSize])
 
 	// R = R ^ S(L ^ K3)
-	xorBytes(tmp, l, c.k3[:])
+	XorBytes(tmp, l, c.k3[:])
 	chacha, err := chacha20.NewCipher(tmp[chachaNonceLen:chachaNonceLen+chachaKeyLen], tmp[:chachaNonceLen])
 	if err != nil {
 		return nil, err
@@ -123,10 +123,10 @@ func (c *Cipher) Decrypt(block []byte) ([]byte, error) {
 	h.Reset()
 	h.Write(r)
 	tmp = h.Sum(nil)
-	xorBytes(l, l, tmp[:lSize])
+	XorBytes(l, l, tmp[:lSize])
 
 	// R = R ^ S(L ^ K1)
-	xorBytes(tmp, l, c.k1[:])
+	XorBytes(tmp, l, c.k1[:])
 	chacha, err = chacha20.NewCipher(tmp[chachaNonceLen:chachaNonceLen+chachaKeyLen], tmp[:chachaNonceLen])
 	if err != nil {
 		return nil, err
