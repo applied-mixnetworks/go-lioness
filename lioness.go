@@ -35,7 +35,7 @@ func NewCipher(key [KeyLen]byte, blockSize int) *Cipher {
 		blockSize: blockSize,
 	}
 	copy(c.k1[:], key[:secretKeyLen])
-	copy(c.k2[:], key[secretKeyLen:hashKeyLen])
+	copy(c.k2[:], key[secretKeyLen:secretKeyLen+hashKeyLen])
 	copy(c.k3[:], key[secretKeyLen+hashKeyLen:secretKeyLen*2+hashKeyLen])
 	copy(c.k4[:], key[(2*secretKeyLen+hashKeyLen):hashKeyLen+(2*secretKeyLen+hashKeyLen)])
 	return &c
@@ -87,6 +87,7 @@ func (c *Cipher) Encrypt(block []byte) ([]byte, error) {
 	out := make([]byte, c.blockSize)
 	copy(out, l)
 	copy(out[lSize:], r)
+
 	return out, nil
 }
 
