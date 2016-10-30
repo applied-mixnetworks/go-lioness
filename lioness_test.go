@@ -8,8 +8,8 @@ import (
 
 func TestBasicLionessEncrypt(t *testing.T) {
 	var err error
-	var key [LionessKeyLen]byte
-	for i := 0; i < LionessKeyLen; i++ {
+	var key [KeyLen]byte
+	for i := 0; i < KeyLen; i++ {
 		key[i] = byte(i) & 0xff
 	}
 
@@ -34,12 +34,12 @@ func TestBasicLionessEncrypt(t *testing.T) {
 }
 
 var draftTestVectors = []struct {
-	key   [LionessKeyLen]byte
+	key   [KeyLen]byte
 	block []byte
 	want  []byte
 }{
 	{
-		key: [LionessKeyLen]byte{
+		key: [KeyLen]byte{
 			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -127,8 +127,8 @@ func TestLionessVectors(t *testing.T) {
 var result []byte
 
 func BenchmarkLioness(b *testing.B) {
-	var key [LionessKeyLen]byte
-	for i := 0; i < LionessKeyLen; i++ {
+	var key [KeyLen]byte
+	for i := 0; i < KeyLen; i++ {
 		key[i] = byte(i) & 0xff
 	}
 
