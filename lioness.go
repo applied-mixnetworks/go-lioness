@@ -8,30 +8,63 @@ import (
 )
 
 const (
-	// KeyLen is the length of our Lioness key
-	KeyLen         = 208
-	chachaNonceLen = 8
-	chachaKeyLen   = 32
-	hashKeyLen     = 64 // blake2b key len
-	secretKeyLen   = chachaKeyLen + chachaNonceLen
-	minBlockSize   = secretKeyLen
+	chacha20NonceLen = 8
+	chacha20KeyLen   = 32
+	blake2bKeyLen    = 64
+	secretKeyLen     = 40
 )
 
-// Cipher allows you to encrypt/decrypt large blocks
+type Chacha20Blake2bLionessCipher struct {
+	cipher *Cipher
+	k1     [secretKeyLen]byte
+	k2     [blake2bKeyLen]byte
+	k3     [secretKeyLen]byte
+	k4     [blake2bKeyLen]byte
+}
+
+func NewChacha20Blake2bLionessCipher(key []byte, blockSize int) *Chacha20Blake2bLionessCipher {
+	if blockSize < chacha20KeyLen+chacha20NonceLen {
+		fmt.Errorf("Specified blocksize %d is smaller than minimum %d", blockSize, chacha20KeyLen+chacha20NonceLen)
+	}
+
+    c := Chacha20Blake2bLionessCipher{
+    }
+    cipher = NewLionessCipher(key, blockSize, secretKeyLen, hashKeyLen, XORKeyStreamFunc, HMACFunc),
+
+	return &c
+}
+
+func (c *Cipher) StreamCipherXor() {
+	chacha, err := chacha20.NewCipher(tmp[chachaNonceLen:chachaNonceLen+chachaKeyLen], tmp[:chachaNonceLen])
+	if err != nil {
+		return nil, err
+	}
+	chacha.XORKeyStream(r, r)
+}
+
+func (c *Cipher) Encrypt(block []byte) ([]byte, error) {
+	cipher = NewLionessCipher()
+
+}
+
+type XORKeyStreamFunc func(dst, src []byte)
+type HMACFunc func(size int, key []byte) []byte
+
+// LionessCipher allows you to encrypt/decrypt large blocks
 type Cipher struct {
 	blockSize int
-	k1        [secretKeyLen]byte
-	k2        [hashKeyLen]byte
-	k3        [secretKeyLen]byte
-	k4        [hashKeyLen]byte
+	k1        []byte
+	k2        []byte
+	k3        []byte
+	k4        []byte
 }
 
 // NewCipher creates a new Cipher struct for encryption/decryption
-func NewCipher(key [KeyLen]byte, blockSize int) *Cipher {
+func NewLionessCipher(key []byte, blockSize int, secretKeyLen, hashKeyLen int, xorStream XORKeyStreamFunc, hmac HMACFunc) *Cipher {
 	if blockSize <= minBlockSize {
 		return nil
 	}
-	c := Cipher{
+	c := LionessCipher{
 		blockSize: blockSize,
 	}
 	copy(c.k1[:], key[:secretKeyLen])
