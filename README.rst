@@ -1,10 +1,19 @@
 
-==========================
-golang Lioness blockcipher
-==========================
+========================================
+the lioness wide block cipher for golang
+========================================
+
+.. image:: https://travis-ci.org/david415/go-lioness.png?branch=master
+    :target: https://www.travis-ci.org/david415/go-lioness
+    :alt: travis for go-lioness
+
+.. image:: https://coveralls.io/repos/github/david415/go-lioness/badge.svg?branch=master
+  :target: https://coveralls.io/github/david415/go-lioness
+  :alt: coveralls for go-lioness
 
 .. image:: https://godoc.org/github.com/david415/go-lioness?status.svg
   :target: https://godoc.org/github.com/david415/go-lioness
+  :alt: golang api docs for go-lioness
 
 
 **DISCLAIMER:** this code has not been properly audited. Use it at your own risk!
@@ -14,7 +23,6 @@ details
 -------
 
 Lioness big block cipher constructed with chacha20 and blake2.
-
 
 
 =======
