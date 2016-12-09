@@ -2,6 +2,7 @@ package lioness
 
 import (
 	"errors"
+	"fmt"
 
 	"git.schwanenlied.me/yawning/chacha20"
 	"github.com/minio/blake2b-simd"
@@ -14,7 +15,8 @@ const (
 	chachaKeyLen   = 32
 	hashKeyLen     = 64 // blake2b key len
 	secretKeyLen   = chachaKeyLen + chachaNonceLen
-	minBlockSize   = secretKeyLen
+	// MinBlockSize is the minimum block size the cipher can process
+	MinBlockSize = secretKeyLen
 )
 
 // Cipher allows you to encrypt/decrypt large blocks
@@ -27,9 +29,11 @@ type Cipher struct {
 }
 
 // NewCipher creates a new Cipher struct for encryption/decryption
-func NewCipher(key [KeyLen]byte, blockSize int) *Cipher {
-	if blockSize <= minBlockSize {
-		return nil
+func NewCipher(key [KeyLen]byte, blockSize int) (*Cipher, error) {
+	// The block size must accomodate |L| = S_KEY_LEN, along with
+	// |R| > 0, and the key should be the correct size.
+	if blockSize <= MinBlockSize {
+		return nil, fmt.Errorf("LIONESS block size mismatch error: %d <= %d min block size", blockSize, MinBlockSize)
 	}
 	c := Cipher{
 		blockSize: blockSize,
@@ -38,13 +42,13 @@ func NewCipher(key [KeyLen]byte, blockSize int) *Cipher {
 	copy(c.k2[:], key[secretKeyLen:secretKeyLen+hashKeyLen])
 	copy(c.k3[:], key[secretKeyLen+hashKeyLen:secretKeyLen*2+hashKeyLen])
 	copy(c.k4[:], key[(2*secretKeyLen+hashKeyLen):hashKeyLen+(2*secretKeyLen+hashKeyLen)])
-	return &c
+	return &c, nil
 }
 
 // Encrypt encrypts a block
 func (c *Cipher) Encrypt(block []byte) ([]byte, error) {
 	if len(block) != c.blockSize {
-		return nil, errors.New("input not equal to block size")
+		return nil, errors.New("LIONESS Encrypt failed: input block size is not equal to block size")
 	}
 
 	lSize := secretKeyLen
@@ -58,7 +62,7 @@ func (c *Cipher) Encrypt(block []byte) ([]byte, error) {
 	XorBytes(tmp, block[:lSize], c.k1[:])
 	chacha, err := chacha20.NewCipher(tmp[chachaNonceLen:chachaNonceLen+chachaKeyLen], tmp[:chachaNonceLen])
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("LIONESS Encrypt failed: %v", err)
 	}
 	chacha.XORKeyStream(r, r)
 
@@ -73,7 +77,7 @@ func (c *Cipher) Encrypt(block []byte) ([]byte, error) {
 	XorBytes(tmp, l, c.k3[:])
 	chacha, err = chacha20.NewCipher(tmp[chachaNonceLen:chachaNonceLen+chachaKeyLen], tmp[:chachaNonceLen])
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("LIONESS Encrypt failed: %v", err)
 	}
 	chacha.XORKeyStream(r, r)
 
@@ -94,7 +98,7 @@ func (c *Cipher) Encrypt(block []byte) ([]byte, error) {
 // Decrypt decrypts a block
 func (c *Cipher) Decrypt(block []byte) ([]byte, error) {
 	if len(block) != c.blockSize {
-		return nil, errors.New("input not equal to block size")
+		return nil, errors.New("LIONESS Decrypt failed: input block size is not equal to block size")
 	}
 
 	lSize := secretKeyLen
@@ -115,7 +119,7 @@ func (c *Cipher) Decrypt(block []byte) ([]byte, error) {
 	XorBytes(tmp, l, c.k3[:])
 	chacha, err := chacha20.NewCipher(tmp[chachaNonceLen:chachaNonceLen+chachaKeyLen], tmp[:chachaNonceLen])
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("LIONESS Decrypt failed: %v", err)
 	}
 	chacha.XORKeyStream(r, r)
 
@@ -130,7 +134,7 @@ func (c *Cipher) Decrypt(block []byte) ([]byte, error) {
 	XorBytes(tmp, l, c.k1[:])
 	chacha, err = chacha20.NewCipher(tmp[chachaNonceLen:chachaNonceLen+chachaKeyLen], tmp[:chachaNonceLen])
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("LIONESS Decrypt failed: %v", err)
 	}
 	chacha.XORKeyStream(r, r)
 
