@@ -5,6 +5,34 @@ import (
 	"testing"
 )
 
+func TestLionessBlockSizeError(t *testing.T) {
+	var key [KeyLen]byte
+	for i := 0; i < KeyLen; i++ {
+		key[i] = byte(i) & 0xff
+	}
+	_, err := NewCipher(key, 15)
+	if err == nil {
+		t.Error("expected block size mismatch error")
+		t.Fail()
+	}
+	cipher, err := NewCipher(key, 1024)
+	if err != nil {
+		t.Error(err)
+		t.Fail()
+	}
+	plaintext := []byte("quick brown fox")
+	_, err = cipher.Encrypt(plaintext)
+	if err == nil {
+		t.Error("expected block size mismatch error")
+		t.Fail()
+	}
+	_, err = cipher.Decrypt(plaintext)
+	if err == nil {
+		t.Error("expected block size mismatch error")
+		t.Fail()
+	}
+}
+
 func TestBasicLionessEncrypt(t *testing.T) {
 	var err error
 	var key [KeyLen]byte
