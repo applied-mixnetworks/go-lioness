@@ -16,7 +16,11 @@ the lioness wide block cipher for golang
   :alt: golang api docs for go-lioness
 
 
-**DISCLAIMER:** this code has not been properly audited. Use it at your own risk!
+Warning
+=======
+This code has not been formally audited by a cryptographer. It therefore should not
+be considered safe or correct. Use it at your own risk! (however test vectors are verified using
+other language implementations: rust, golang, python trinity!)
 
 
 details
