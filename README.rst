@@ -3,16 +3,16 @@
 the lioness wide block cipher for golang
 ========================================
 
-.. image:: https://travis-ci.org/david415/go-lioness.png?branch=master
-    :target: https://www.travis-ci.org/david415/go-lioness
+.. image:: https://travis-ci.org/applied-mixnetworks/go-lioness.png?branch=master
+    :target: https://www.travis-ci.org/applied-mixnetworks/go-lioness
     :alt: travis for go-lioness
 
-.. image:: https://coveralls.io/repos/github/david415/go-lioness/badge.svg?branch=master
-  :target: https://coveralls.io/github/david415/go-lioness
+.. image:: https://coveralls.io/repos/github/applied-mixnetworks/go-lioness/badge.svg?branch=master
+  :target: https://coveralls.io/github/applied-mixnetworks/go-lioness
   :alt: coveralls for go-lioness
 
-.. image:: https://godoc.org/github.com/david415/go-lioness?status.svg
-  :target: https://godoc.org/github.com/david415/go-lioness
+.. image:: https://godoc.org/github.com/applied-mixnetworks/go-lioness?status.svg
+  :target: https://godoc.org/github.com/applied-mixnetworks/go-lioness
   :alt: golang api docs for go-lioness
 
 
