@@ -28,7 +28,7 @@ type Cipher struct {
 func NewCipher(key [KeyLen]byte, blockSize int) (*Cipher, error) {
 	// The block size must accomodate |L| = S_KEY_LEN, along with
 	// |R| > 0, and the key should be the correct size.
-	if blockSize <= KeyLen {
+	if blockSize <= streamCipherKeyLen {
 		return nil, fmt.Errorf("LIONESS block size mismatch error: %d <= %d min block size", blockSize, KeyLen)
 	}
 	c := Cipher{
