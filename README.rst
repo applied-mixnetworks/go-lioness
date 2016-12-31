@@ -19,14 +19,19 @@ the lioness wide block cipher for golang
 Warning
 =======
 This code has not been formally audited by a cryptographer. It therefore should not
-be considered safe or correct. Use it at your own risk! (however test vectors are verified using
-other language implementations: rust, golang, python trinity!)
+be considered safe or correct. Use it at your own risk!
 
 
 details
 -------
 
-Lioness big block cipher constructed with chacha20 and blake2.
+Lioness wide block cipher constructed with chacha20 and blake2b.
+
+read the Lioness paper:
+**Two Practical and Provably Secure Block Ciphers: BEAR and LION**
+*by Ross Anderson and Eli Biham*
+
+https://www.cl.cam.ac.uk/~rja14/Papers/bear-lion.pdf
 
 
 =======
